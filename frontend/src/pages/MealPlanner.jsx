@@ -16,7 +16,7 @@ const MealPlanner = () => {
     if (!token) return;
 
     try {
-      const res = await axios.get(`http://localhost:5000/api/mealplan/${weekParam}`, {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/mealplan/${weekParam}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -62,7 +62,7 @@ const MealPlanner = () => {
     if (!token) return alert("Login required");
 
     try {
-      await axios.post(`http://localhost:5000/api/mealplan`, { week, meals: mealsWithNotes }, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/mealplan`, { week, meals: mealsWithNotes }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Meal plan saved to cloud");
