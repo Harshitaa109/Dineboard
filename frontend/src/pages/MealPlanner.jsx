@@ -16,17 +16,23 @@ const MealPlanner = () => {
     if (!token) return;
 
     try {
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/mealplan/${weekParam}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/mealplan/${weekParam}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      const { meals: mealData } = res.data;
-      const updatedMeals = {}, updatedNotes = {};
+      const mealData = res?.data?.meals || {};
+      const updatedMeals = {};
+      const updatedNotes = {};
+
       defaultDays.forEach((day) => {
         const entry = mealData[day];
         updatedMeals[day] = typeof entry === "string" ? entry : entry?.name || "";
         updatedNotes[day] = typeof entry === "object" ? entry?.note || "" : "";
       });
+
       setMeals(updatedMeals);
       setNotes(updatedNotes);
     } catch (err) {
@@ -54,26 +60,35 @@ const MealPlanner = () => {
 
     if (!saveToCloud) {
       localStorage.setItem(`mealplan-${week}`, JSON.stringify(mealsWithNotes));
-      alert("Saved to Local Storage");
+      alert("✅ Saved to Local Storage");
       return;
     }
 
     const token = localStorage.getItem("token");
-    if (!token) return alert("Login required");
+    if (!token) return alert("⚠️ Login required");
 
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/mealplan`, { week, meals: mealsWithNotes }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      alert("Meal plan saved to cloud");
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/mealplan`,
+        { week, meals: mealsWithNotes },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      alert("✅ Meal plan saved to cloud");
     } catch (err) {
       console.error("Save error:", err.message);
-      alert("Failed to save meal plan");
+      alert("❌ Failed to save meal plan");
     }
   };
 
-  const handleMealChange = (day, value) => setMeals({ ...meals, [day]: value });
-  const handleNoteChange = (day, value) => setNotes({ ...notes, [day]: value });
+  const handleMealChange = (day, value) => {
+    setMeals((prev) => ({ ...prev, [day]: value }));
+  };
+
+  const handleNoteChange = (day, value) => {
+    setNotes((prev) => ({ ...prev, [day]: value }));
+  };
 
   const handleCopyLastWeek = async () => {
     const prevWeek = getPreviousWeek(week);
@@ -82,7 +97,8 @@ const MealPlanner = () => {
   };
 
   const handleResetWeek = () => {
-    const resetMeals = {}, resetNotes = {};
+    const resetMeals = {};
+    const resetNotes = {};
     defaultDays.forEach((day) => {
       resetMeals[day] = "";
       resetNotes[day] = "";
@@ -172,7 +188,7 @@ const MealPlanner = () => {
             note={notes[day] || ""}
             onMealChange={handleMealChange}
             onNoteChange={handleNoteChange}
-            darkMode={true} // you can use this prop in MealCard to apply dark styles
+            darkMode={true}
           />
         ))}
       </div>
