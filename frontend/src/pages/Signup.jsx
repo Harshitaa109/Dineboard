@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
+  const [name, setName] = useState(""); // New name state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -11,13 +12,17 @@ const Signup = () => {
     e.preventDefault();
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`, {
+        name, // Send name too
         email,
         password,
       });
       alert("Signup successful! Please log in.");
       navigate("/login");
     } catch (err) {
-      alert("Signup failed: " + err.response.data.message);
+      const message =
+        err.response?.data?.message ||
+        "Server not responding. Is your backend running?";
+      alert("Signup failed: " + message);
     }
   };
 
@@ -27,7 +32,18 @@ const Signup = () => {
         onSubmit={handleSignup}
         className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Sign Up</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
+          Sign Up
+        </h2>
+
+        <label className="block mb-2 text-sm font-medium text-gray-600">Name</label>
+        <input
+          type="text"
+          className="w-full px-4 py-2 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
 
         <label className="block mb-2 text-sm font-medium text-gray-600">Email</label>
         <input
